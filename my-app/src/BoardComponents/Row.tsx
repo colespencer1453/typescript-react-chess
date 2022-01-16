@@ -17,10 +17,10 @@ const Row = ({row, rowIndex, handleMovePiece} : RowProps) => {
                         <Cell 
                             x={rowIndex}
                             y={index} 
-                            key={index} 
+                            key={`${index}-${piece?.uuid}`} 
                             handleMovePiece={handleMovePiece}
                         >
-                            {piece ? <PieceContainer piece={piece}/> : <></>}
+                            {piece ? <PieceContainer key={piece?.uuid} piece={piece}/> : <></>}
                         </Cell>
                     )
                 })
