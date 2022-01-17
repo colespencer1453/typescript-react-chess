@@ -1,5 +1,4 @@
 import { useDrop } from 'react-dnd'
-import { Board } from '../Pieces/Board';
 import { Coordinate } from '../Pieces/Coordinate';
 import { Piece } from '../Pieces/Piece';
 
@@ -48,10 +47,6 @@ const neonYellow = {
 const neonGreen = {
     backgroundColor: '#5ceb23'
 }
-
-// neon green #5ceb23
-// neon red #f51414
-// neon yello #edf514
 
 const Cell = ({x, y, children, isValidMove, handlePieceMove} : CellProps) => {
     const [{ isOver, canDrop }, drop] = useDrop(

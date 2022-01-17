@@ -10,9 +10,21 @@ export class Pawn extends Piece{
 
    isValidMove(moveLocation: Coordinate): boolean {
       if(this.color === 'white'){
-         return (moveLocation.x === (this.currentLocation.x - 1)) && (moveLocation.y === this.currentLocation.y);
+         if(this.currentLocation.x === 6) {
+            return ((moveLocation.x - this.currentLocation.x >= -2) && (moveLocation.y === this.currentLocation.y)) ||
+            (((moveLocation.x - this.currentLocation.x === -1)) && (Math.abs(moveLocation.y - this.currentLocation.y) === 1));
+         }
+
+         return ((moveLocation.x - this.currentLocation.x === -1) && (moveLocation.y === this.currentLocation.y)) || 
+         (((moveLocation.x - this.currentLocation.x === -1)) && (Math.abs(moveLocation.y - this.currentLocation.y) === 1));
       } else {
-         return (moveLocation.x === (this.currentLocation.x + 1)) && (moveLocation.y === this.currentLocation.y);
+         if(this.currentLocation.x === 1) {
+            return ((moveLocation.x - this.currentLocation.x <= 2) && (moveLocation.y === this.currentLocation.y)) || 
+            (((moveLocation.x - this.currentLocation.x === 1)) && (Math.abs(moveLocation.y - this.currentLocation.y) === 1));
+         }
+
+         return ((moveLocation.x - this.currentLocation.x === 1) && (moveLocation.y === this.currentLocation.y)) || 
+         (((moveLocation.x - this.currentLocation.x === 1)) && (Math.abs(moveLocation.y - this.currentLocation.y) === 1));
       }
    }
 }

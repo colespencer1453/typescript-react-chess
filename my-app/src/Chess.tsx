@@ -19,9 +19,12 @@ const Chess = (): JSX.Element => {
     }
 
     return (
-        <DndProvider backend={HTML5Backend}>
-            <BoardContainer board={board.pieces} handlePieceMove={handlePieceMove} isValidMove={isValidMove}/>
-        </DndProvider>
+        <>
+            <DndProvider backend={HTML5Backend}>
+                <BoardContainer board={board.pieces} handlePieceMove={handlePieceMove} isValidMove={isValidMove} colorOfActiveTurn={board.colorOfActiveTurn}/>
+            </DndProvider>
+            <p>{board.isCheck ? 'A team is in check!' : 'Nobody is in check'}</p>
+        </>
     )
 }
 

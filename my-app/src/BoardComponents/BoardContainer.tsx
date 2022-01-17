@@ -1,14 +1,14 @@
 import Row from "./Row";
 import { Piece } from "../Pieces/Piece";
-import { Board } from "../Pieces/Board";
 
 interface BoardProps {
     board: Array<Array<(Piece | null)>>;
     isValidMove: Function;
     handlePieceMove: Function;
+    colorOfActiveTurn: string;
 }
 
-const BoardContainer = ({ board, isValidMove, handlePieceMove } : BoardProps) => {
+const BoardContainer = ({ board, isValidMove, handlePieceMove, colorOfActiveTurn } : BoardProps) => {
     return (
         <>
             {
@@ -19,6 +19,7 @@ const BoardContainer = ({ board, isValidMove, handlePieceMove } : BoardProps) =>
                         rowIndex={index} 
                         isValidMove={isValidMove}
                         handlePieceMove={handlePieceMove}
+                        colorOfActiveTurn={colorOfActiveTurn}
                     />
                 )
             }
