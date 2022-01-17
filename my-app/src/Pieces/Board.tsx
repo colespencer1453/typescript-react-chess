@@ -133,64 +133,97 @@ export class Board {
    isValidMove(moveLocation: Coordinate, piece: Piece){
       if(!piece.isValidMove(moveLocation)) return false;
 
-      const occupyingPiece = this.getPieceAtLocation(moveLocation);
+      const contentsOfMoveSquare = this.getPieceAtLocation(moveLocation);
 
-      if(occupyingPiece !== null) {
-         if(piece.isSameTeam(occupyingPiece as Piece)) {
-            return false;
-         }
-      }
-
-      if(piece.pieceName === Pieces.PAWN 
-         && calculateAbsoluteSlope(moveLocation, piece.currentLocation) === 1
-         && occupyingPiece === null) {
-         return false;
-      }
-
-      if(!(piece.pieceName === Pieces.KNIGHT)) {
-         if(this.pieceExistsBetweenTwoPoints(piece.currentLocation, moveLocation)) return false;
-      }
+      if(this.pieceAtMoveLocationIsSameTeam(contentsOfMoveSquare, piece)) return false;
+      if(this.shouldDisablePawnAttackMove(moveLocation, piece, contentsOfMoveSquare)) return false;
+      if(this.pieceIsBlockingMove(moveLocation, piece)) return false;
 
       // case 4 if moving team is in check the move must remove them from check
 
       return true;
    }
 
-   movePiece(moveLocation: Coordinate, piece: Piece): void {
-      const occupyingPiece = this.getPieceAtLocation(moveLocation);
+   private pieceAtMoveLocationIsSameTeam(contentsOfMoveSquare: Piece | null, piece: Piece): boolean {
+      return contentsOfMoveSquare !== null && piece.isSameTeam(contentsOfMoveSquare as Piece);
+   }
 
-      if(occupyingPiece !== null) {
-         if(piece.color === 'white') {
-            this.blackPieces = this.blackPieces.filter(piece => piece.uuid === occupyingPiece.uuid)
-         } else {
-            this.whitePieces = this.whitePieces.filter(piece => piece.uuid === occupyingPiece.uuid)
-         }
-      }
+   private shouldDisablePawnAttackMove(moveLocation: Coordinate, piece: Piece, contentsOfMoveSquare: Piece | null): boolean {
+      if(piece.pieceName !== Pieces.PAWN) return false;
 
-      this.pieces[moveLocation.x][moveLocation.y] = piece;
-      this.pieces[piece.currentLocation.x][piece.currentLocation.y] = null
-      piece.setCurrentLocation(moveLocation);
+      return this.pawnCanAttack(moveLocation, piece, contentsOfMoveSquare);
+   }
 
-      if(piece.color === this.colorOfActiveTurn) {
+   private pawnCanAttack(moveLocation: Coordinate, piece: Piece, contentsOfMoveSquare: Piece | null): boolean {
+      return (calculateAbsoluteSlope(moveLocation, piece.currentLocation) === 1 && contentsOfMoveSquare === null);
+   }
+
+   private pieceIsBlockingMove(moveLocation: Coordinate, piece: Piece): boolean {
+      if(piece.pieceName === Pieces.KNIGHT) return false;
+
+      return this.pieceExistsBetweenTwoPoints(piece.currentLocation, moveLocation);
+   }
+
+   movePiece(moveLocation: Coordinate, piece: Piece, isCheckValidationOperation?: boolean): void {
+      this.removePieceIfPieceAttacked(moveLocation, piece);
+
+      this.updatePieceLocation(moveLocation, piece);
+
+      this.updateActiveTeam(piece);
+
+      this.updateKingLocationIfMoved(piece, moveLocation);
+
+      this.updateIsCheck(piece);
+   }
+
+   private updateActiveTeam(piece: Piece) {
+      // This if statement is needed because of a bug in react dnd calling movePiece twice
+      if (piece.color === this.colorOfActiveTurn) {
          this.toggleActiveTeam();
       }
+   }
 
-      if(piece.pieceName === Pieces.KING) {
-         if(piece.color === 'white') {
-            this.whiteKingLocation = moveLocation;
-         } else {
-            this.blackKingLocation = moveLocation;
-         }
-      }
+   private removePieceIfPieceAttacked(moveLocation: Coordinate, piece: Piece) {
+      const occupyingPiece = this.getPieceAtLocation(moveLocation);
 
-      if(piece.color === 'white') {
-         if(this.whitePieces.some(piece => this.isValidMove(this.blackKingLocation, piece))) {
+      if (occupyingPiece !== null)
+         this.removePieceFromActivePieces(piece, occupyingPiece);
+   }
+
+   // *** All the if statements in th functions below point to the need for some sort of team class ***
+   private updateIsCheck(piece: Piece) {
+      if (piece.color === 'white') {
+         if (this.whitePieces.some(piece => this.isValidMove(this.blackKingLocation, piece))) {
             this.isCheck = true;
          }
       } else {
-         if(this.blackPieces.some(piece => this.isValidMove(this.whiteKingLocation, piece))) {
+         if (this.blackPieces.some(piece => this.isValidMove(this.whiteKingLocation, piece))) {
             this.isCheck = true;
          }
+      }
+   }
+
+   private updateKingLocationIfMoved(piece: Piece, moveLocation: Coordinate) {
+      if(piece.pieceName !== Pieces.KING) return;
+
+      if (piece.color === 'white') {
+         this.whiteKingLocation = moveLocation;
+      } else {
+         this.blackKingLocation = moveLocation;
+      }
+   }
+
+   private updatePieceLocation(moveLocation: Coordinate, piece: Piece) {
+      this.pieces[moveLocation.x][moveLocation.y] = piece;
+      this.pieces[piece.currentLocation.x][piece.currentLocation.y] = null;
+      piece.setCurrentLocation(moveLocation);
+   }
+
+   private removePieceFromActivePieces(piece: Piece, occupyingPiece: Piece) {
+      if (piece.color === 'white') {
+         this.blackPieces = this.blackPieces.filter(piece => piece.uuid === occupyingPiece.uuid);
+      } else {
+         this.whitePieces = this.whitePieces.filter(piece => piece.uuid === occupyingPiece.uuid);
       }
    }
 }
