@@ -1,17 +1,18 @@
 import { Coordinate } from "./Coordinate";
 import { Piece } from "./Piece";
 import  { ChessPawn } from '@emotion-icons/fa-solid'
+import { Pieces } from "../Enums/PieceEnum";
 
 export class Pawn extends Piece{ 
-   constructor(coordinate: Coordinate, color: string) {
-      super(ChessPawn, coordinate, color);
+   constructor(startLocation: Coordinate, color: string) {
+      super(ChessPawn, startLocation, color, Pieces.PAWN);
    }
 
    isValidMove(moveLocation: Coordinate): boolean {
       if(this.color === 'white'){
-         return (moveLocation.x === (this.coordinate.x - 1)) && (moveLocation.y === this.coordinate.y);
+         return (moveLocation.x === (this.currentLocation.x - 1)) && (moveLocation.y === this.currentLocation.y);
       } else {
-         return (moveLocation.x === (this.coordinate.x + 1)) && (moveLocation.y === this.coordinate.y);
+         return (moveLocation.x === (this.currentLocation.x + 1)) && (moveLocation.y === this.currentLocation.y);
       }
    }
 }

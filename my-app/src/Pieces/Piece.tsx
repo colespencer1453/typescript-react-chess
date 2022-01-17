@@ -1,22 +1,29 @@
-import  {Coordinate} from './Coordinate';
+import { Coordinate } from './Coordinate';
+import { Pieces } from '../Enums/PieceEnum';
 import { v4 as uuidv4 } from 'uuid';
 
 export abstract class Piece { 
-    icon: JSX.Element;
-    coordinate: Coordinate;
+    pieceName: Pieces
+    currentLocation: Coordinate;
     color: string;
+    icon: any;
     uuid: string;
 
-    constructor(icon: any, coordinate: Coordinate, color: string){
-        this.icon = icon;
-        this.coordinate = coordinate;
+    constructor(icon: any, coordinate: Coordinate, color: string, pieceName : Pieces ){
+        this.pieceName = pieceName;
+        this.currentLocation = coordinate;
         this.color = color;
+        this.icon = icon;
         this.uuid = uuidv4();
+
     }
 
-    setCoordinate(x: number, y: number){
-        this.coordinate.x = x;
-        this.coordinate.y = y;
+    setCurrentLocation(newLocation: Coordinate){
+        this.currentLocation = newLocation;
+    }
+
+    isSameTeam(piece: Piece): boolean {
+        return this.color === piece.color;
     }
 
     abstract isValidMove( moveLocation: Coordinate): boolean;

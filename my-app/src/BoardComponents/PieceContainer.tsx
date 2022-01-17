@@ -1,7 +1,8 @@
 import { useDrag } from 'react-dnd'
+import { Piece } from "../Pieces/Piece";
 
 interface PieceContainerProps {
-   piece: any;
+   piece: (Piece | null);
 }
 
 const PieceContainer = ({piece} : PieceContainerProps) => {
@@ -15,12 +16,15 @@ const PieceContainer = ({piece} : PieceContainerProps) => {
 
    const Icon = piece?.icon;
 
+   const style = { 
+      opacity: isDragging ? .4 : 1,
+      cursor: 'grab',
+   }
+
    return (
       <div 
          ref={drag}
-         style={{
-            opacity: isDragging ? .4 : 1,
-          }}
+         style={style}
       >
          {piece ? <Icon size={48} style={{color:piece.color === 'white' ? "#efdfbb" : piece.color}}/> : <></>}
       </div>

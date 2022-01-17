@@ -1,11 +1,13 @@
 import { useDrop } from 'react-dnd'
+import { Board } from '../Pieces/Board';
 import { Coordinate } from '../Pieces/Coordinate';
 import { Piece } from '../Pieces/Piece';
 
 interface CellProps {
     x: number;
     y: number;
-    handleMovePiece: Function;
+    handlePieceMove: Function;
+    isValidMove: Function;
     children?: JSX.Element;
 }
 
@@ -27,12 +29,36 @@ const offWhiteSquare = {
     justifyContent:'center'
 }
 
-const Cell = ({x, y, children, handleMovePiece} : CellProps) => {
+const baseSquareStyle = {
+    height:'85px',
+    width:'85px',
+    display:'flex',
+    alignItems:'center',
+    justifyContent:'center'
+}
+
+const neonRed = {
+    backgroundColor: '#f51414'
+};
+
+const neonYellow = {
+    backgroundColor: '#edf514'
+}
+
+const neonGreen = {
+    backgroundColor: '#5ceb23'
+}
+
+// neon green #5ceb23
+// neon red #f51414
+// neon yello #edf514
+
+const Cell = ({x, y, children, isValidMove, handlePieceMove} : CellProps) => {
     const [{ isOver, canDrop }, drop] = useDrop(
         () => ({
           accept: 'piece',
-          drop: (piece) => handleMovePiece(x,y, piece),
-          canDrop: (piece:Piece) => piece.isValidMove(new Coordinate(x, y)),
+          drop: (piece) => handlePieceMove(new Coordinate(x,y), piece),
+          canDrop: (piece : Piece) => isValidMove(new Coordinate(x, y), piece),
           collect: (monitor) => ({
             isOver: !!monitor.isOver(),
             canDrop: !!monitor.canDrop(),
@@ -42,6 +68,18 @@ const Cell = ({x, y, children, handleMovePiece} : CellProps) => {
     );
 
     const getSquareStyle = () => {
+        if(isOver && !canDrop) {
+            return {...baseSquareStyle, ...neonRed};
+        }
+
+        if(!isOver && canDrop) {
+            return {...baseSquareStyle, ...neonYellow}
+        }
+
+        if(isOver && canDrop) {
+            return {...baseSquareStyle, ...neonGreen}
+        }
+
         return (x+y) % 2 === 1 ? greenSquare : offWhiteSquare
     }
     

@@ -1,14 +1,18 @@
 import Cell from "./Cell";
 import { Grid } from "@mui/material";
 import PieceContainer from "../BoardComponents/PieceContainer"
+import { Piece } from "../Pieces/Piece";
+import { Board } from "../Pieces/Board";
+
 
 interface RowProps {
-    row: Array<any>;
+    row: (Piece | null)[];
     rowIndex: number;
-    handleMovePiece: Function;
+    isValidMove: Function;
+    handlePieceMove: Function;
 }
 
-const Row = ({row, rowIndex, handleMovePiece} : RowProps) => {
+const Row = ({ row, rowIndex, handlePieceMove, isValidMove } : RowProps) => {
     return (
         <Grid container>
             {
@@ -17,8 +21,9 @@ const Row = ({row, rowIndex, handleMovePiece} : RowProps) => {
                         <Cell 
                             x={rowIndex}
                             y={index} 
-                            key={`${index}-${piece?.uuid}`} 
-                            handleMovePiece={handleMovePiece}
+                            key={`${index}-${piece?.uuid}`}
+                            isValidMove={isValidMove}
+                            handlePieceMove={handlePieceMove}
                         >
                             {piece ? <PieceContainer key={piece?.uuid} piece={piece}/> : <></>}
                         </Cell>
