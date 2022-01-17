@@ -8,10 +8,10 @@ interface RowProps {
     rowIndex: number;
     isValidMove: Function;
     handlePieceMove: Function;
-    colorOfActiveTurn: string;
+    isWhitesTurn: boolean;
 }
 
-const Row = ({ row, rowIndex, handlePieceMove, isValidMove, colorOfActiveTurn } : RowProps) => {
+const Row = ({ row, rowIndex, handlePieceMove, isValidMove, isWhitesTurn } : RowProps) => {
     return (
         <Grid container>
             {
@@ -24,7 +24,7 @@ const Row = ({ row, rowIndex, handlePieceMove, isValidMove, colorOfActiveTurn } 
                             isValidMove={isValidMove}
                             handlePieceMove={handlePieceMove}
                         >
-                            {piece ? <PieceContainer colorOfActiveTurn={colorOfActiveTurn} key={piece?.uuid} piece={piece}/> : <></>}
+                            {piece ? <PieceContainer isWhitesTurn={isWhitesTurn} key={piece?.uuid} piece={piece}/> : <></>}
                         </Cell>
                     )
                 })

@@ -5,10 +5,10 @@ interface BoardProps {
     board: Array<Array<(Piece | null)>>;
     isValidMove: Function;
     handlePieceMove: Function;
-    colorOfActiveTurn: string;
+    isWhitesTurn: boolean;
 }
 
-const BoardContainer = ({ board, isValidMove, handlePieceMove, colorOfActiveTurn } : BoardProps) => {
+const BoardContainer = ({ board, isValidMove, handlePieceMove, isWhitesTurn } : BoardProps) => {
     return (
         <>
             {
@@ -19,7 +19,7 @@ const BoardContainer = ({ board, isValidMove, handlePieceMove, colorOfActiveTurn
                         rowIndex={index} 
                         isValidMove={isValidMove}
                         handlePieceMove={handlePieceMove}
-                        colorOfActiveTurn={colorOfActiveTurn}
+                        isWhitesTurn={isWhitesTurn}
                     />
                 )
             }

@@ -3,19 +3,19 @@ import { Piece } from "../Pieces/Piece";
 
 interface PieceContainerProps {
    piece: (Piece | null);
-   colorOfActiveTurn: string;
+   isWhitesTurn: boolean;
 }
 
-const PieceContainer = ({ piece, colorOfActiveTurn} : PieceContainerProps) => {
+const PieceContainer = ({ piece, isWhitesTurn} : PieceContainerProps) => {
    const [{ isDragging, canDrag}, drag] = useDrag(() => ({
       type: 'piece',
       item: piece,
-      canDrag: () => piece?.color === colorOfActiveTurn,
+      canDrag: () => (isWhitesTurn && piece?.color === 'white') || (!isWhitesTurn && piece?.color === 'black'),
       collect: (monitor) => ({
         isDragging: !!monitor.isDragging(),
         canDrag: !!monitor.canDrag(),
       })
-    }), [colorOfActiveTurn])
+    }), [isWhitesTurn])
 
    const Icon = piece?.icon;
 
