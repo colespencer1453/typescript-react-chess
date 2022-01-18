@@ -6,8 +6,7 @@ import { Coordinate } from "./Pieces/Coordinate";
 import { Piece } from "./Pieces/Piece";
 import { createTeamPieces, initializeBoard } from '../src/Utilities/GameSetupUtilities'
 import { Pieces } from "./Enums/PieceEnum";
-import { calculateAbsoluteSlope, getSubsetOfPointsBetweenTwoPoints, getSubsetOfPointsBetweenTwoPointsOnAVerticalLine } from "./Utilities/ValidationUtilities";
-
+import { isValidMove } from "./Utilities/ValidationUtilities";
 
 const Chess = (): JSX.Element => {
     const [whitePieces, setWhitePieces] = useState(createTeamPieces('white'));
@@ -18,53 +17,9 @@ const Chess = (): JSX.Element => {
     const [whiteKingLocation, setWhiteKingLocation] = useState(new Coordinate(7,4));
     const [blackKingLocation, setBlackKingLocation] = useState(new Coordinate(0, 4));
 
-    function isValidMove(moveLocation: Coordinate, piece: Piece){
-        if(!piece.isValidMove(moveLocation)) return false;
-
-        const contentsOfMoveSquare = getPieceAtLocation(moveLocation);
-
-        if(pieceAtMoveLocationIsSameTeam(contentsOfMoveSquare, piece)) return false;
-        if(shouldDisablePawnAttackMove(moveLocation, piece, contentsOfMoveSquare)) return false;
-        if(pieceIsBlockingMove(moveLocation, piece)) return false;
-
-        // case 4 if moving team is in check the move must remove them from check
-
-        return true;
+    function handleIsValidMove(moveLocation: Coordinate, piece: Piece){
+        return isValidMove(moveLocation, piece, board);
     }
-  
-    function pieceAtMoveLocationIsSameTeam(contentsOfMoveSquare: Piece | null, piece: Piece): boolean {
-        return contentsOfMoveSquare !== null && piece.isSameTeam(contentsOfMoveSquare as Piece);
-    }
-
-    function shouldDisablePawnAttackMove(moveLocation: Coordinate, piece: Piece, contentsOfMoveSquare: Piece | null): boolean {
-        if(piece.pieceName !== Pieces.PAWN) return false;
-
-        return pawnCanAttack(moveLocation, piece, contentsOfMoveSquare);
-    }
-
-    function pawnCanAttack(moveLocation: Coordinate, piece: Piece, contentsOfMoveSquare: Piece | null): boolean {
-        return (calculateAbsoluteSlope(moveLocation, piece.currentLocation) === 1 && contentsOfMoveSquare === null);
-    }
-
-    function pieceIsBlockingMove(moveLocation: Coordinate, piece: Piece): boolean {
-        if(piece.pieceName === Pieces.KNIGHT) return false;
-
-        return pieceExistsBetweenTwoPoints(piece.currentLocation, moveLocation);
-    }
-
-    function pieceExistsBetweenTwoPoints(currentLocation: Coordinate, moveLocation: Coordinate) : boolean {
-        const slope = calculateAbsoluteSlope(currentLocation, moveLocation);
-  
-        if(slope === Infinity) {
-           return getSubsetOfPointsBetweenTwoPointsOnAVerticalLine(currentLocation, moveLocation)
-              .map(point => getPieceAtLocation(point))
-                 .some(piece => piece !== null);
-        }
-  
-        return getSubsetOfPointsBetweenTwoPoints(currentLocation, moveLocation)
-           .map(point => getPieceAtLocation(point))
-           .some(piece => piece !== null);
-     }
 
     const handlePieceMove = (moveLocation: Coordinate, piece: Piece): void => {
         removePieceIfPieceAttacked(moveLocation, piece);
@@ -93,11 +48,11 @@ const Chess = (): JSX.Element => {
 
     function updateIsCheck(piece: Piece) {
         if (piece.color === 'white') {
-           if (whitePieces.some(piece => isValidMove(blackKingLocation, piece))) {
+           if (whitePieces.some(piece => handleIsValidMove(blackKingLocation, piece))) {
               setIsCheck(true);
            }
         } else {
-           if (blackPieces.some(piece => isValidMove(whiteKingLocation, piece))) {
+           if (blackPieces.some(piece => handleIsValidMove(whiteKingLocation, piece))) {
               setIsCheck(true);
            }
         }
@@ -132,7 +87,7 @@ const Chess = (): JSX.Element => {
     return (
         <>
             <DndProvider backend={HTML5Backend}>
-                <BoardContainer board={board} handlePieceMove={handlePieceMove} isValidMove={isValidMove} isWhitesTurn={isWhitesTurn}/>
+                <BoardContainer board={board} handlePieceMove={handlePieceMove} isValidMove={handleIsValidMove} isWhitesTurn={isWhitesTurn}/>
             </DndProvider>
             <p>{isCheck ? 'A team is in check!' : 'Nobody is in check'}</p>
         </>
