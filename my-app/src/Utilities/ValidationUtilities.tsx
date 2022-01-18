@@ -28,7 +28,17 @@ const createLineFunction = (coordinate1: Coordinate, coordinate2: Coordinate): F
    }
 }
 
-export const getSubsetOfPointsBetweenTwoPoints = (coordinate1: Coordinate, coordinate2: Coordinate): Array<Coordinate> => {
+export const getSubsetOfCoordinatesBetweenTwoPoints = (coordinate1: Coordinate, coordinate2: Coordinate): Array<Coordinate> => {
+   const slope = calculateAbsoluteSlope(coordinate1, coordinate2);
+
+   if(slope === Infinity) {
+      return getSubsetOfPointsBetweenTwoPointsOnAVerticalLine(coordinate1, coordinate2);
+   }
+
+   return getSubsetOfPointsBetweenTwoPointsOnLinearFunction(coordinate1, coordinate2);
+}
+
+export const getSubsetOfPointsBetweenTwoPointsOnLinearFunction = (coordinate1: Coordinate, coordinate2: Coordinate): Array<Coordinate> => {
    let subset = [];
 
    const lineFunction = createLineFunction(coordinate1, coordinate2);
@@ -71,6 +81,7 @@ export function isValidMove(
 
    if(pieceAtMoveLocationIsSameTeam(contentsOfMoveSquare, piece)) return false;
    if(shouldDisablePawnAttackMove(moveLocation, piece, contentsOfMoveSquare)) return false;
+   if(shouldDisablePawnTwoSquareMove(moveLocation, piece, contentsOfMoveSquare)) return false;
    if(pieceIsBlockingMove(moveLocation, piece)) return false;
 
    return true;
@@ -81,6 +92,13 @@ export function isValidMove(
    
    function pieceAtMoveLocationIsSameTeam(contentsOfMoveSquare: Piece | null, piece: Piece): boolean {
       return contentsOfMoveSquare !== null && piece.isSameTeam(contentsOfMoveSquare as Piece);
+   }
+
+   function shouldDisablePawnTwoSquareMove(moveLocation: Coordinate, piece: Piece, contentsOfMoveSquare: Piece | null): boolean {
+      if(piece.pieceName !== Pieces.PAWN) return false;
+      if(Math.abs(moveLocation.x - piece.currentLocation.x) > 1 && contentsOfMoveSquare !== null) return true;
+
+      return false;
    }
    
    function shouldDisablePawnAttackMove(moveLocation: Coordinate, piece: Piece, contentsOfMoveSquare: Piece | null): boolean {
@@ -100,17 +118,9 @@ export function isValidMove(
    }
    
    function pieceExistsBetweenTwoPoints(currentLocation: Coordinate, moveLocation: Coordinate) : boolean {
-      const slope = calculateAbsoluteSlope(currentLocation, moveLocation);
-   
-      if(slope === Infinity) {
-         return getSubsetOfPointsBetweenTwoPointsOnAVerticalLine(currentLocation, moveLocation)
-            .map(point => getPieceAtLocation(point))
-               .some(piece => piece !== null);
-      }
-   
-      return getSubsetOfPointsBetweenTwoPoints(currentLocation, moveLocation)
-         .map(point => getPieceAtLocation(point))
-         .some(piece => piece !== null);
+      return getSubsetOfCoordinatesBetweenTwoPoints(currentLocation, moveLocation)
+               .map(point => getPieceAtLocation(point))
+                  .some(piece => piece !== null);      
    }
 }
 

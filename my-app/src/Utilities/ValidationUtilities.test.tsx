@@ -1,4 +1,4 @@
-import { getSubsetOfPointsBetweenTwoPoints, getSubsetOfPointsBetweenTwoPointsOnAVerticalLine } from "./ValidationUtilities";
+import { getSubsetOfPointsBetweenTwoPointsOnLinearFunction, getSubsetOfPointsBetweenTwoPointsOnAVerticalLine } from "./ValidationUtilities";
 import { Coordinate } from "../Pieces/Coordinate";
 
 
@@ -10,7 +10,7 @@ describe("getSubsetOfPointsBetweenTwoPoints", () => {
       const point1 = new Coordinate(1,3);
       const point2 = new Coordinate(5,7);
 
-      const subset = getSubsetOfPointsBetweenTwoPoints(point1, point2);
+      const subset = getSubsetOfPointsBetweenTwoPointsOnLinearFunction(point1, point2);
    
       expect(subset).toEqual(expect.arrayContaining(expected));
       expect(subset.length).toEqual(expected.length);
@@ -21,7 +21,7 @@ describe("getSubsetOfPointsBetweenTwoPoints", () => {
    
       const point1 = new Coordinate(1,3);
       const point2 = new Coordinate(5,7);
-      const subset = getSubsetOfPointsBetweenTwoPoints(point2, point1);
+      const subset = getSubsetOfPointsBetweenTwoPointsOnLinearFunction(point2, point1);
 
       expect(subset).toEqual(expect.arrayContaining(expected));
       expect(subset.length).toEqual(expected.length);
@@ -35,7 +35,7 @@ describe("getSubsetOfPointsBetweenTwoPoints", () => {
       const point2 = new Coordinate(2,3);
 
       //act
-      const subset = getSubsetOfPointsBetweenTwoPoints(point1, point2);
+      const subset = getSubsetOfPointsBetweenTwoPointsOnLinearFunction(point1, point2);
       
       //assert
       expect(subset).toEqual(expect.arrayContaining(expected));
@@ -50,7 +50,7 @@ describe("getSubsetOfPointsBetweenTwoPoints", () => {
       const point2 = new Coordinate(2,3);
 
       //act
-      const subset = getSubsetOfPointsBetweenTwoPoints(point2, point1);
+      const subset = getSubsetOfPointsBetweenTwoPointsOnLinearFunction(point2, point1);
       
       //assert
       expect(subset).toEqual(expect.arrayContaining(expected));
@@ -65,7 +65,7 @@ describe("getSubsetOfPointsBetweenTwoPoints", () => {
       const point2 = new Coordinate(1,3);
 
       //act
-      const subset = getSubsetOfPointsBetweenTwoPoints(point1, point2);
+      const subset = getSubsetOfPointsBetweenTwoPointsOnLinearFunction(point1, point2);
       
       //assert
       expect(subset).toEqual(expect.arrayContaining(expected));
@@ -80,7 +80,7 @@ describe("getSubsetOfPointsBetweenTwoPoints", () => {
       const point2 = new Coordinate(1,3);
 
       //act
-      const subset = getSubsetOfPointsBetweenTwoPoints(point2, point1);
+      const subset = getSubsetOfPointsBetweenTwoPointsOnLinearFunction(point2, point1);
       
       //assert
       expect(subset).toEqual(expect.arrayContaining(expected));
