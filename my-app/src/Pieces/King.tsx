@@ -4,9 +4,11 @@ import  { ChessKing } from '@emotion-icons/fa-solid'
 import { Pieces } from "../Enums/PieceEnum";
 
 export class King extends Piece{ 
+   hasMoved: boolean
 
    constructor(coordinate: Coordinate, color: string) {
       super(ChessKing, coordinate, color, Pieces.KING);
+      this.hasMoved = false;
    }
    
    isValidMove( moveLocation: Coordinate): boolean {

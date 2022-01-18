@@ -1,6 +1,7 @@
 import { Pieces } from '../Enums/PieceEnum';
 import { Coordinate } from '../Pieces/Coordinate'
 import { Piece } from '../Pieces/Piece';
+import { cloneDeep } from 'lodash';
 
 export const calculateSlope = (coordinate1: Coordinate, coordinate2: Coordinate): number => {
    const rise = coordinate2.y - coordinate1.y;
@@ -29,6 +30,7 @@ const createLineFunction = (coordinate1: Coordinate, coordinate2: Coordinate): F
 
 export const getSubsetOfPointsBetweenTwoPoints = (coordinate1: Coordinate, coordinate2: Coordinate): Array<Coordinate> => {
    let subset = [];
+
    const lineFunction = createLineFunction(coordinate1, coordinate2);
 
    const max = Math.max(coordinate1.x, coordinate2.x);
@@ -58,7 +60,11 @@ export const getSubsetOfPointsBetweenTwoPointsOnAVerticalLine = (coordinate1: Co
    return subset;
 }
 
-export function isValidMove(moveLocation: Coordinate, piece: Piece, board: Array<Array<(Piece | null)>>){
+export function isValidMove(
+   moveLocation: Coordinate, 
+   piece: Piece, 
+   board: Array<Array<(Piece | null)>>,
+){
    if(!piece.isValidMove(moveLocation)) return false;
 
    const contentsOfMoveSquare = getPieceAtLocation(moveLocation);
@@ -66,8 +72,6 @@ export function isValidMove(moveLocation: Coordinate, piece: Piece, board: Array
    if(pieceAtMoveLocationIsSameTeam(contentsOfMoveSquare, piece)) return false;
    if(shouldDisablePawnAttackMove(moveLocation, piece, contentsOfMoveSquare)) return false;
    if(pieceIsBlockingMove(moveLocation, piece)) return false;
-
-   // case 4 if moving team is in check the move must remove them from check
 
    return true;
 
@@ -108,4 +112,15 @@ export function isValidMove(moveLocation: Coordinate, piece: Piece, board: Array
          .map(point => getPieceAtLocation(point))
          .some(piece => piece !== null);
    }
+}
+
+export function createCopyOfCurrentBoardAfterMove(moveLocation: Coordinate, piece: Piece, board: Array<Array<(Piece | null)>>): Array<Array<(Piece | null)>> {
+   let boardCopy = [...board.map(row => [...row.map(piece => piece === null ? null : cloneDeep(piece))])];
+
+   const pieceCopy = cloneDeep(piece);
+   boardCopy[moveLocation.x][moveLocation.y] = pieceCopy;
+   boardCopy[piece.currentLocation.x][piece.currentLocation.y] = null;
+   pieceCopy.setCurrentLocation(moveLocation);
+
+   return boardCopy;
 }

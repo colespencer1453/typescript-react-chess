@@ -22,7 +22,7 @@ const createPawnRow = (color: string) : Array<Piece> => {
    return row;
 }
 
-export const createTeamPieces = (color: string) : Array<Piece> => {
+export const createRoyalRow = (color: string) : Array<Piece> => {
    let row = [];
    let rowIndex = color === 'white' ? 7 : 0;
 
@@ -35,34 +35,26 @@ export const createTeamPieces = (color: string) : Array<Piece> => {
    row.push(new Knight(new Coordinate(rowIndex, 6), color));
    row.push(new Rook(new Coordinate(rowIndex, 7), color));
 
-   return row.concat(createPawnRow(color));
+   return row;
 }
 
 const getNullRow = () => {
    return [null, null, null, null, null, null, null, null];
 }
 
-export const initializeBoard = (whitePieces: Array<Piece>, blackPieces: Array<Piece>) : Array<Array<(Piece | null)>> => {
+export const initializeBoard = () : Array<Array<(Piece | null)>> => {
    let board = Array<Array<(Piece | null)>>();
 
    board = [
+      createRoyalRow('black'),
+      createPawnRow('black'),
       getNullRow(),
       getNullRow(),
       getNullRow(),
       getNullRow(),
-      getNullRow(),
-      getNullRow(),
-      getNullRow(),
-      getNullRow(),
+      createPawnRow('white'),
+      createRoyalRow('white'),
    ]
-
-   whitePieces.forEach(piece => {
-      board[piece.currentLocation.x][piece.currentLocation.y] = piece;
-   });
-
-   blackPieces.forEach(piece => {
-      board[piece.currentLocation.x][piece.currentLocation.y] = piece;
-   });
 
    return board;
 }
