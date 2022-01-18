@@ -7,12 +7,18 @@ import { Piece } from "./Pieces/Piece";
 import { initializeBoard } from '../src/Utilities/GameSetupUtilities'
 import { Pieces } from "./Enums/PieceEnum";
 import { isValidMove, createCopyOfCurrentBoardAfterMove, getSubsetOfCoordinatesBetweenTwoPoints } from "./Utilities/ValidationUtilities";
+import { Button, Container, Typography, Grid } from "@mui/material";
+import ButtonAppBar from "./Views/ButtonAppBar";
+import { v4 as uuidv4 } from 'uuid';
 
 const Chess = (): JSX.Element => {
     const [board, setBoard] = useState(initializeBoard());
     const [isWhitesTurn, setIsWhitesTurn] = useState(true);
     const [isCheck, setIsCheck] = useState(false);
     const [isCheckMate, setIsCheckMate] = useState(false);
+    const [winningTeam, setWinningTeam] = useState('');
+    const [teamInCheck, setTeamInCheck] = useState('');
+    const [gameId, setGameId] = useState(uuidv4());
 
     function handleIsValidMove(moveLocation: Coordinate, piece: Piece){
         if (!isValidMove(moveLocation, piece, board)) return false;
@@ -29,9 +35,17 @@ const Chess = (): JSX.Element => {
         setIsWhitesTurn(prevState => !prevState);
 
         if(checkIfIsCheck(getOppositeColor(piece.color), board)) {
-            if(checkIfIsCheckMate(getOppositeColor(piece.color))) setIsCheckMate(true); 
+            if(checkIfIsCheckMate(getOppositeColor(piece.color))) {
+                setIsCheckMate(true);
+                setWinningTeam(piece.color);
+            } 
+
+            setTeamInCheck(getOppositeColor(piece.color))
             setIsCheck(true);
+        } else {
+            setIsCheck(false);
         }
+        
     }
 
     function checkIfIsCheckMate(teamColorToCheck: string) : boolean {
@@ -42,10 +56,6 @@ const Chess = (): JSX.Element => {
         const locationOfCheckedKing = checkedKing?.currentLocation as Coordinate
 
         const attackers = piecesOfAttackingTeam.filter(piece => isValidMove(locationOfCheckedKing, piece as Piece, board));
-
-        console.log(attackers);
-        console.log(checkedTeamCanBlockOrKillAttacker(attackers, locationOfCheckedKing, piecesOfTeamInCheck));
-        console.log(kingCanEscape(checkedKing as Piece));
 
         return !checkedTeamCanBlockOrKillAttacker(attackers, locationOfCheckedKing, piecesOfTeamInCheck) && !kingCanEscape(checkedKing as Piece);
     }
@@ -119,14 +129,50 @@ const Chess = (): JSX.Element => {
         piece.setCurrentLocation(moveLocation);
     }
 
+    const getHeaderText = () => {
+        if(isCheckMate) {
+            return `${winningTeam} Won! Click the button to play again!`;
+        }
+
+        if(isCheck) return `${teamInCheck} is in check`;
+
+        return isWhitesTurn ? "White's turn" : "Black's turn"
+    }
+
+    const handleNewGameClick = () => {
+        setBoard(initializeBoard());
+        setIsWhitesTurn(true);
+        setIsCheck(false);
+        setIsCheckMate(false);
+        setWinningTeam('');
+        setTeamInCheck('');
+        setGameId(uuidv4());
+    }
+
+    console.log(board);
+
     return (
         <>
-            <DndProvider backend={HTML5Backend}>
-                <BoardContainer board={board} handlePieceMove={handlePieceMove} isValidMove={handleIsValidMove} isWhitesTurn={isWhitesTurn}/>
-            </DndProvider>
-            <p>{isCheck ? 'A team is in check!' : 'Nobody is in check'}</p>
-            <p>{isCheckMate ? 'Thats checkmate folks' : 'youve still got a fight left'}</p>
+            <ButtonAppBar/>
+            <Container >
+                <Grid container justifyContent="center">
+                    <Typography variant="h4" style={{marginTop:'5px', marginLeft:'5px'}}>
+                        {getHeaderText()}
+                    </Typography>
+                </Grid>
+                <div style={{marginTop:'10px'}}>
+                    <DndProvider backend={HTML5Backend}>
+                        <BoardContainer gameId={gameId} board={board} handlePieceMove={handlePieceMove} isValidMove={handleIsValidMove} isWhitesTurn={isWhitesTurn}/>
+                    </DndProvider>
+                </div>
+                <Grid container justifyContent="center" style={{marginTop:'10px'}}>
+                    <Button variant="contained" style={{backgroundColor:'green'}} onClick={handleNewGameClick}>
+                        Start New Game
+                    </Button>      
+                </Grid>
+            </Container>
         </>
+
     )
 }
 

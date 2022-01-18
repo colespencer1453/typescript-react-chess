@@ -13,7 +13,7 @@ interface RowProps {
 
 const Row = ({ row, rowIndex, handlePieceMove, isValidMove, isWhitesTurn } : RowProps) => {
     return (
-        <Grid container>
+        <Grid container justifyContent='center'>
             {
                 row.map((piece, index) => {
                     return (

@@ -6,17 +6,18 @@ interface BoardProps {
     isValidMove: Function;
     handlePieceMove: Function;
     isWhitesTurn: boolean;
+    gameId: string;
 }
 
-const BoardContainer = ({ board, isValidMove, handlePieceMove, isWhitesTurn } : BoardProps) => {
+const BoardContainer = ({ board, isValidMove, handlePieceMove, isWhitesTurn, gameId } : BoardProps) => {
     return (
         <>
             {
                 board.map((row, index) => 
                     <Row 
                         row={row} 
-                        key={index} 
-                        rowIndex={index} 
+                        key={`${index}-${gameId}`}
+                        rowIndex={index}
                         isValidMove={isValidMove}
                         handlePieceMove={handlePieceMove}
                         isWhitesTurn={isWhitesTurn}

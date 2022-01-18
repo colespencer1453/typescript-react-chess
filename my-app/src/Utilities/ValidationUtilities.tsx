@@ -81,7 +81,7 @@ export function isValidMove(
 
    if(pieceAtMoveLocationIsSameTeam(contentsOfMoveSquare, piece)) return false;
    if(shouldDisablePawnAttackMove(moveLocation, piece, contentsOfMoveSquare)) return false;
-   if(shouldDisablePawnTwoSquareMove(moveLocation, piece, contentsOfMoveSquare)) return false;
+   if(shouldDisablePawnForwardMove(moveLocation, piece, contentsOfMoveSquare)) return false;
    if(pieceIsBlockingMove(moveLocation, piece)) return false;
 
    return true;
@@ -94,9 +94,10 @@ export function isValidMove(
       return contentsOfMoveSquare !== null && piece.isSameTeam(contentsOfMoveSquare as Piece);
    }
 
-   function shouldDisablePawnTwoSquareMove(moveLocation: Coordinate, piece: Piece, contentsOfMoveSquare: Piece | null): boolean {
+   function shouldDisablePawnForwardMove(moveLocation: Coordinate, piece: Piece, contentsOfMoveSquare: Piece | null): boolean {
       if(piece.pieceName !== Pieces.PAWN) return false;
-      if(Math.abs(moveLocation.x - piece.currentLocation.x) > 1 && contentsOfMoveSquare !== null) return true;
+
+      if((contentsOfMoveSquare !== null) && moveLocation.y === piece.currentLocation.y) return true;
 
       return false;
    }
