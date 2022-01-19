@@ -32,6 +32,7 @@ const Chess = (): JSX.Element => {
 
     const handlePieceMove = (moveLocation: Coordinate, piece: Piece): void => {
         updatePieceLocation(moveLocation, piece);
+        piece.setHasMoved(true);
         setIsWhitesTurn(prevState => !prevState);
 
         if(checkIfIsCheck(getOppositeColor(piece.color), board)) {
