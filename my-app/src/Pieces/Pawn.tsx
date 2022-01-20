@@ -11,7 +11,7 @@ export class Pawn extends Piece{
    isValidMove(moveLocation: Coordinate): boolean {
       if(this.color === 'white'){
          if(this.currentLocation.x === 6) {
-            return ((moveLocation.x - this.currentLocation.x >= -2) && (moveLocation.y === this.currentLocation.y)) ||
+            return ((moveLocation.x - this.currentLocation.x >= -2 && moveLocation.x - this.currentLocation.x <=0) && (moveLocation.y === this.currentLocation.y)) ||
             (((moveLocation.x - this.currentLocation.x === -1)) && (Math.abs(moveLocation.y - this.currentLocation.y) === 1));
          }
 
@@ -19,7 +19,7 @@ export class Pawn extends Piece{
          (((moveLocation.x - this.currentLocation.x === -1)) && (Math.abs(moveLocation.y - this.currentLocation.y) === 1));
       } else {
          if(this.currentLocation.x === 1) {
-            return ((moveLocation.x - this.currentLocation.x <= 2) && (moveLocation.y === this.currentLocation.y)) || 
+            return ((moveLocation.x - this.currentLocation.x <= 2 && moveLocation.x - this.currentLocation.x >=0 ) && (moveLocation.y === this.currentLocation.y)) || 
             (((moveLocation.x - this.currentLocation.x === 1)) && (Math.abs(moveLocation.y - this.currentLocation.y) === 1));
          }
 
