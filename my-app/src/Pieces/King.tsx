@@ -1,13 +1,14 @@
 import { Coordinate } from "./Coordinate";
 import { Piece } from "./Piece";
 import  { ChessKing } from '@emotion-icons/fa-solid'
-import { Pieces } from "../Enums/PieceEnum";
+import { Pieces } from "../Enums/Pieces";
+import { Teams } from "../Enums/Teams";
 
 export class King extends Piece{ 
    hasMoved: boolean
 
-   constructor(coordinate: Coordinate, color: string) {
-      super(ChessKing, coordinate, color, Pieces.KING);
+   constructor(coordinate: Coordinate, team: Teams) {
+      super(ChessKing, coordinate, team, Pieces.KING);
       this.hasMoved = false;
    }
    

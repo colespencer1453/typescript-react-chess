@@ -1,4 +1,3 @@
-
 export enum Pieces {
    KNIGHT,
    QUEEN,

@@ -1,7 +1,9 @@
-import { Pieces } from '../Enums/PieceEnum';
+import { Pieces } from '../Enums/Pieces';
+import { Teams } from '../Enums/Teams';
 import { Coordinate } from '../Pieces/Coordinate'
 import { Piece } from '../Pieces/Piece';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, inRange } from 'lodash';
+import { absoluteValueDiff, diff } from './MathUtilities';
 
 export const calculateSlope = (coordinate1: Coordinate, coordinate2: Coordinate): number => {
    const rise = coordinate2.y - coordinate1.y;
@@ -135,3 +137,33 @@ export function createCopyOfCurrentBoardAfterMove(moveLocation: Coordinate, piec
 
    return boardCopy;
 }
+
+export const moveIsInVeritcalRange = (moveLocation: Coordinate, currentLocation: Coordinate, start: number, end: number) => {
+   return inRange(absoluteValueDiff(moveLocation.x,  currentLocation.x), start, end);
+}
+
+export const moveIsInHorizontalRange = (moveLocation: Coordinate, currentLocation: Coordinate) => {
+
+}
+
+export const moveIsVerticallyForwards = (moveLocation: Coordinate, currentLocation: Coordinate, team: Teams) => {
+   
+   return isVerticalMove(moveLocation, currentLocation) && isForwardsMove(moveLocation, currentLocation, team);
+}
+
+export const isVerticalMove = (moveLocation: Coordinate, currentLocation: Coordinate) => {
+   return moveLocation.y === currentLocation.y && moveLocation.x !== currentLocation.x;
+}
+
+export const isHorizontalMove = (moveLocation: Coordinate, currentLocation: Coordinate) => {
+   return moveLocation.x === currentLocation.x && moveLocation.y !== currentLocation.y;
+}
+
+export const isForwardsMove = (moveLocation: Coordinate, currentLocation: Coordinate, team: Teams) => {
+   return team === Teams.BLACK ? diff(moveLocation.x, currentLocation.x) > 0 : diff(moveLocation.x, currentLocation.x) < 0;
+}
+
+export const isDiagonalMove = (moveLocation: Coordinate, currentLocation: Coordinate) => {
+   return calculateAbsoluteSlope(moveLocation, currentLocation) === 1;
+}
+

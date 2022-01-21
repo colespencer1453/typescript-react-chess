@@ -5,19 +5,20 @@ import { HTML5Backend } from 'react-dnd-html5-backend'
 import { Coordinate } from "./Pieces/Coordinate";
 import { Piece } from "./Pieces/Piece";
 import { initializeBoard } from '../src/Utilities/GameSetupUtilities'
-import { Pieces } from "./Enums/PieceEnum";
+import { Pieces } from "./Enums/Pieces";
 import { isValidMove, createCopyOfCurrentBoardAfterMove, getSubsetOfCoordinatesBetweenTwoPoints } from "./Utilities/ValidationUtilities";
 import { Button, Container, Typography, Grid } from "@mui/material";
 import ButtonAppBar from "./Views/ButtonAppBar";
 import { v4 as uuidv4 } from 'uuid';
+import { Teams } from "./Enums/Teams";
 
 const Chess = (): JSX.Element => {
     const [board, setBoard] = useState(initializeBoard());
     const [isWhitesTurn, setIsWhitesTurn] = useState(true);
     const [isCheck, setIsCheck] = useState(false);
     const [isCheckMate, setIsCheckMate] = useState(false);
-    const [winningTeam, setWinningTeam] = useState('');
-    const [teamInCheck, setTeamInCheck] = useState('');
+    const [winningTeam, setWinningTeam] = useState(Teams.UNDEFINED);
+    const [teamInCheck, setTeamInCheck] = useState(Teams.UNDEFINED);
     const [gameId, setGameId] = useState(uuidv4());
 
     function handleIsValidMove(moveLocation: Coordinate, piece: Piece){
@@ -25,7 +26,7 @@ const Chess = (): JSX.Element => {
 
         const boardWithMoveExecuted = createCopyOfCurrentBoardAfterMove(moveLocation, piece, board);
         
-        if(checkIfIsCheck(piece.color, boardWithMoveExecuted)) return false;
+        if(checkIfIsCheck(piece.team, boardWithMoveExecuted)) return false;
 
         return true;
     }
@@ -33,14 +34,15 @@ const Chess = (): JSX.Element => {
     const handlePieceMove = (moveLocation: Coordinate, piece: Piece): void => {
         updatePieceLocation(moveLocation, piece);
         setIsWhitesTurn(prevState => !prevState);
+        piece.setHasMovedToTrue();
 
-        if(checkIfIsCheck(getOppositeColor(piece.color), board)) {
-            if(checkIfIsCheckMate(getOppositeColor(piece.color))) {
+        if(checkIfIsCheck(getOppositeTeam(piece.team), board)) {
+            if(checkIfIsCheckMate(getOppositeTeam(piece.team))) {
                 setIsCheckMate(true);
-                setWinningTeam(piece.color);
+                setWinningTeam(piece.team);
             } 
 
-            setTeamInCheck(getOppositeColor(piece.color))
+            setTeamInCheck(getOppositeTeam(piece.team))
             setIsCheck(true);
         } else {
             setIsCheck(false);
@@ -48,11 +50,11 @@ const Chess = (): JSX.Element => {
         
     }
 
-    function checkIfIsCheckMate(teamColorToCheck: string) : boolean {
-        const piecesOfAttackingTeam = getPiecesFromBoardByTeam(getOppositeColor(teamColorToCheck), board);
-        const piecesOfTeamInCheck = getPiecesFromBoardByTeam(teamColorToCheck, board);
+    function checkIfIsCheckMate(teamToCheck: Teams) : boolean {
+        const piecesOfAttackingTeam = getPiecesFromBoardByTeam(getOppositeTeam(teamToCheck), board);
+        const piecesOfTeamInCheck = getPiecesFromBoardByTeam(teamToCheck, board);
 
-        const checkedKing = getKingFromBoardByTeam(teamColorToCheck, board);
+        const checkedKing = getKingFromBoardByTeam(teamToCheck, board);
         const locationOfCheckedKing = checkedKing?.currentLocation as Coordinate
 
         const attackers = piecesOfAttackingTeam.filter(piece => isValidMove(locationOfCheckedKing, piece as Piece, board));
@@ -94,31 +96,31 @@ const Chess = (): JSX.Element => {
         return spacesToCheck;
     }
 
-    function checkIfIsCheck(color: string, boardToCheck: Array<Array<(Piece | null)>>) {
-        const locationOfWhiteKing = getLocationOfKingByTeam(color, boardToCheck);
+    function checkIfIsCheck(team: Teams, boardToCheck: Array<Array<(Piece | null)>>) {
+        const locationOfWhiteKing = getLocationOfKingByTeam(team, boardToCheck);
 
-        return locationOfKingIsValidMoveForOpposingTeam(color, boardToCheck, locationOfWhiteKing);
+        return locationOfKingIsValidMoveForOpposingTeam(team, boardToCheck, locationOfWhiteKing);
     }
 
-    function locationOfKingIsValidMoveForOpposingTeam(color: string, boardToCheck: (Piece | null)[][], locationOfWhiteKing: Coordinate | undefined) {
-        return getPiecesFromBoardByTeam(getOppositeColor(color), boardToCheck)
+    function locationOfKingIsValidMoveForOpposingTeam(team: Teams, boardToCheck: (Piece | null)[][], locationOfWhiteKing: Coordinate | undefined) {
+        return getPiecesFromBoardByTeam(getOppositeTeam(team), boardToCheck)
             .some(piece => isValidMove(locationOfWhiteKing as Coordinate, piece as Piece, boardToCheck));
     }
 
-    function getOppositeColor(color: string): string {
-        return color === 'white' ? 'black' : 'white';
+    function getOppositeTeam(team: Teams): Teams {
+        return team === Teams.WHITE ? Teams.BLACK : Teams.WHITE;
     }
 
-    function getPiecesFromBoardByTeam(teamColor: string, boardToCheck: (Piece | null)[][]) {
-        return boardToCheck.flat().filter(piece => piece?.color === teamColor);
+    function getPiecesFromBoardByTeam(team: Teams, boardToCheck: (Piece | null)[][]) {
+        return boardToCheck.flat().filter(piece => piece?.team === team);
     }
 
-    function getLocationOfKingByTeam(teamColor: string, boardToCheck: Array<Array<(Piece | null)>>) {
-        return boardToCheck.flat().find(piece => piece?.color === teamColor && piece.pieceName === Pieces.KING)?.currentLocation;
+    function getLocationOfKingByTeam(team: Teams, boardToCheck: Array<Array<(Piece | null)>>) {
+        return boardToCheck.flat().find(piece => piece?.team === team && piece.pieceName === Pieces.KING)?.currentLocation;
     }
 
-    function getKingFromBoardByTeam(teamColor: string, boardToCheck: Array<Array<(Piece | null)>>) {
-        return boardToCheck.flat().find(piece => piece?.color === teamColor && piece.pieceName === Pieces.KING);
+    function getKingFromBoardByTeam(team: Teams, boardToCheck: Array<Array<(Piece | null)>>) {
+        return boardToCheck.flat().find(piece => piece?.team === team && piece.pieceName === Pieces.KING);
     }
 
     function updatePieceLocation(moveLocation: Coordinate, piece: Piece) {
@@ -144,12 +146,10 @@ const Chess = (): JSX.Element => {
         setIsWhitesTurn(true);
         setIsCheck(false);
         setIsCheckMate(false);
-        setWinningTeam('');
-        setTeamInCheck('');
+        setWinningTeam(Teams.UNDEFINED);
+        setTeamInCheck(Teams.UNDEFINED);
         setGameId(uuidv4());
     }
-
-    console.log(board);
 
     return (
         <>
