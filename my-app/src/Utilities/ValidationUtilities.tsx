@@ -2,6 +2,7 @@ import { Pieces } from '../Enums/PieceEnum';
 import { Coordinate } from '../Pieces/Coordinate'
 import { Piece } from '../Pieces/Piece';
 import { cloneDeep } from 'lodash';
+import { King } from '../Pieces/King';
 
 export const calculateSlope = (coordinate1: Coordinate, coordinate2: Coordinate): number => {
    const rise = coordinate2.y - coordinate1.y;
@@ -70,6 +71,42 @@ export const getSubsetOfPointsBetweenTwoPointsOnAVerticalLine = (coordinate1: Co
    return subset;
 }
 
+export function checkIfIsCheck(color: string, boardToCheck: Array<Array<(Piece | null)>>) {
+   const locationOfKing = getLocationOfKingByTeam(color, boardToCheck);
+
+   return locationCanBeCaptured(color, boardToCheck, locationOfKing);
+}
+
+export function getLocationOfKingByTeam(teamColor: string, boardToCheck: Array<Array<(Piece | null)>>) {
+   return boardToCheck.flat().find(piece => piece?.color === teamColor && piece.pieceName === Pieces.KING)?.currentLocation;
+}
+
+export function locationCanBeCaptured(color: string, boardToCheck: (Piece | null)[][], location: Coordinate | undefined) {
+   return getPiecesFromBoardByTeam(getOppositeColor(color), boardToCheck)
+       .some(piece => isValidMove(location as Coordinate, piece as Piece, boardToCheck));
+}
+
+export function getPiecesFromBoardByTeam(teamColor: string, boardToCheck: (Piece | null)[][]) {
+   return boardToCheck.flat().filter(piece => piece?.color === teamColor);
+}
+
+export function getOppositeColor(color: string): string {
+   return color === 'white' ? 'black' : 'white';
+}
+
+export function getCorrespondingRook(moveLocation: Coordinate, board: Array<Array<(Piece | null)>>) : Piece | null {
+   if (moveLocation.equals(King.whiteCastleLeftMove)) {
+      return board[7][0];
+   } else if (moveLocation.equals(King.whiteCastleRightMove)) {
+      return board[7][7];
+   } else if (moveLocation.equals(King.blackCastleLeftMove)) {
+      return board[0][0];
+   } else if (moveLocation.equals(King.blackCastleRightMove)) {
+      return board[0][7];
+   }
+   return null
+}
+
 export function isValidMove(
    moveLocation: Coordinate, 
    piece: Piece, 
@@ -83,6 +120,7 @@ export function isValidMove(
    if(shouldDisablePawnAttackMove(moveLocation, piece, contentsOfMoveSquare)) return false;
    if(shouldDisablePawnForwardMove(moveLocation, piece, contentsOfMoveSquare)) return false;
    if(pieceIsBlockingMove(moveLocation, piece)) return false;
+   if(isInvalidCastlingMove(moveLocation, piece, board)) return false;
 
    return true;
 
@@ -123,6 +161,46 @@ export function isValidMove(
                .map(point => getPieceAtLocation(point))
                   .some(piece => piece !== null);      
    }
+
+   /*  
+      castling is only possible if neither the king nor the rook has moved
+      there must not be any pieces between the king and the rook
+      the king may not be in check
+      the square the king goes to and any intervening squares may not be under attack
+      */
+   function isInvalidCastlingMove(moveLocation: Coordinate, piece: Piece, board: Array<Array<(Piece | null)>>) : boolean {
+      if (piece.pieceName !== Pieces.KING) return false;
+      if (!(piece as King).isCastlingMove(moveLocation)) return false;
+
+      let correspondingRook: Piece | null = getCorrespondingRook(moveLocation, board);
+
+      if (correspondingRook) {
+         console.log(`rook: ${correspondingRook.currentLocation.x} ${correspondingRook.currentLocation.y}`)
+      }
+
+      if (!correspondingRook || correspondingRook.pieceName !== Pieces.ROOK || correspondingRook.color !== piece.color || correspondingRook.hasMoved) {
+         return true;
+      }
+
+      // TODO: implement check for the king may not be in check
+      if (checkIfIsCheck(piece.color, board)) {
+         return true;
+      }
+
+      console.log(`check: ${piece.color}`)
+
+      // TODO: the square the king goes to and any intervening squares may not be under attack
+      let moveDiff = moveLocation.y - piece.currentLocation.y;
+      for (let i = 0; i < Math.abs(moveDiff); i += 1) {
+         console.log(`underattack: ${moveLocation.y} to ${piece.currentLocation.y}`)
+         if (locationCanBeCaptured(piece.color, board, new Coordinate(piece.currentLocation.x, piece.currentLocation.y + (i * Math.sign(moveDiff))))){
+            return true;
+         }
+      }
+
+      return false;
+   }
+
 }
 
 export function createCopyOfCurrentBoardAfterMove(moveLocation: Coordinate, piece: Piece, board: Array<Array<(Piece | null)>>): Array<Array<(Piece | null)>> {

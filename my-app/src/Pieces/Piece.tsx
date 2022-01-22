@@ -8,6 +8,7 @@ export abstract class Piece {
     color: string;
     icon: any;
     uuid: string;
+    hasMoved: boolean;
 
     constructor(icon: any, coordinate: Coordinate, color: string, pieceName : Pieces ){
         this.pieceName = pieceName;
@@ -15,11 +16,15 @@ export abstract class Piece {
         this.color = color;
         this.icon = icon;
         this.uuid = uuidv4();
-
+        this.hasMoved = false;
     }
 
     setCurrentLocation(newLocation: Coordinate){
         this.currentLocation = newLocation;
+    }
+
+    setHasMoved(hasMoved: boolean) {
+        this.hasMoved = hasMoved;
     }
 
     isSameTeam(piece: Piece): boolean {
