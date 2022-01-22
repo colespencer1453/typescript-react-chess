@@ -94,6 +94,19 @@ export function getOppositeColor(color: string): string {
    return color === 'white' ? 'black' : 'white';
 }
 
+export function getCorrespondingRook(moveLocation: Coordinate, board: Array<Array<(Piece | null)>>) : Piece | null {
+   if (moveLocation.equals(King.whiteCastleLeftMove)) {
+      return board[7][0];
+   } else if (moveLocation.equals(King.whiteCastleRightMove)) {
+      return board[7][7];
+   } else if (moveLocation.equals(King.blackCastleLeftMove)) {
+      return board[0][0];
+   } else if (moveLocation.equals(King.blackCastleRightMove)) {
+      return board[0][7];
+   }
+   return null
+}
+
 export function isValidMove(
    moveLocation: Coordinate, 
    piece: Piece, 
@@ -157,7 +170,6 @@ export function isValidMove(
       */
    function isInvalidCastlingMove(moveLocation: Coordinate, piece: Piece, board: Array<Array<(Piece | null)>>) : boolean {
       if (piece.pieceName !== Pieces.KING) return false;
-      console.log(`isCastlingMove: ${(piece as King).isCastlingMove(moveLocation)}`)
       if (!(piece as King).isCastlingMove(moveLocation)) return false;
 
       let correspondingRook: Piece | null = getCorrespondingRook(moveLocation, board);
@@ -189,18 +201,6 @@ export function isValidMove(
       return false;
    }
 
-   function getCorrespondingRook(moveLocation: Coordinate, board: Array<Array<(Piece | null)>>) : Piece | null {
-      if (moveLocation.equals(King.whiteCastleLeftMove)) {
-         return board[7][0];
-      } else if (moveLocation.equals(King.whiteCastleRightMove)) {
-         return board[7][7];
-      } else if (moveLocation.equals(King.blackCastleLeftMove)) {
-         return board[0][0];
-      } else if (moveLocation.equals(King.blackCastleRightMove)) {
-         return board[0][7];
-      }
-      return null
-   }
 }
 
 export function createCopyOfCurrentBoardAfterMove(moveLocation: Coordinate, piece: Piece, board: Array<Array<(Piece | null)>>): Array<Array<(Piece | null)>> {

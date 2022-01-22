@@ -12,11 +12,13 @@ import {
     isValidMove, 
     createCopyOfCurrentBoardAfterMove, 
     getSubsetOfCoordinatesBetweenTwoPoints,
-    getPiecesFromBoardByTeam
+    getPiecesFromBoardByTeam,
+    getCorrespondingRook
 } from "./Utilities/ValidationUtilities";
 import { Button, Container, Typography, Grid } from "@mui/material";
 import ButtonAppBar from "./Views/ButtonAppBar";
 import { v4 as uuidv4 } from 'uuid';
+import { King } from './Pieces/King';
 
 const Chess = (): JSX.Element => {
     const [board, setBoard] = useState(initializeBoard());
@@ -38,6 +40,13 @@ const Chess = (): JSX.Element => {
     }
 
     const handlePieceMove = (moveLocation: Coordinate, piece: Piece): void => {
+        if (piece.pieceName === Pieces.KING && (piece as King).isCastlingMove(moveLocation)) {
+            if (moveLocation.equals(King.whiteCastleLeftMove) || moveLocation.equals(King.blackCastleLeftMove)) {
+                updatePieceLocation(new Coordinate( moveLocation.x, moveLocation.y + 1), getCorrespondingRook(moveLocation, board) as Piece);
+            } else {
+                updatePieceLocation(new Coordinate( moveLocation.x, moveLocation.y - 1), getCorrespondingRook(moveLocation, board) as Piece);
+            }
+        }
         updatePieceLocation(moveLocation, piece);
         piece.setHasMoved(true);
         setIsWhitesTurn(prevState => !prevState);
