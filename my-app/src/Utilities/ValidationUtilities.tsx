@@ -2,7 +2,6 @@ import { Pieces } from '../Enums/PieceEnum';
 import { Coordinate } from '../Pieces/Coordinate'
 import { Piece } from '../Pieces/Piece';
 import { cloneDeep } from 'lodash';
-import { King } from '../Pieces/King';
 
 export const calculateSlope = (coordinate1: Coordinate, coordinate2: Coordinate): number => {
    const rise = coordinate2.y - coordinate1.y;
@@ -84,7 +83,6 @@ export function isValidMove(
    if(shouldDisablePawnAttackMove(moveLocation, piece, contentsOfMoveSquare)) return false;
    if(shouldDisablePawnForwardMove(moveLocation, piece, contentsOfMoveSquare)) return false;
    if(pieceIsBlockingMove(moveLocation, piece)) return false;
-   if(pieceIsCastlingAndCannotCastle(moveLocation, piece, board)) return false;
 
    return true;
 
@@ -124,42 +122,6 @@ export function isValidMove(
       return getSubsetOfCoordinatesBetweenTwoPoints(currentLocation, moveLocation)
                .map(point => getPieceAtLocation(point))
                   .some(piece => piece !== null);      
-   }
-
-   /*  
-      castling is only possible if neither the king nor the rook has moved
-      there must not be any pieces between the king and the rook
-      the king may not be in check
-      the square the king goes to and any intervening squares may not be under attack
-      */
-   function pieceIsCastlingAndCannotCastle(moveLocation: Coordinate, piece: Piece, board: Array<Array<(Piece | null)>>) : boolean {
-      if (piece.pieceName !== Pieces.KING) return false;
-      if (!(piece as King).isCastlingMove(moveLocation)) return false;
-
-      let correspondingCastle: Piece | null = getCorrespondingCastle(moveLocation, board);
-
-      if (!correspondingCastle || correspondingCastle.pieceName !== Pieces.ROOK || correspondingCastle.hasMoved) {
-         return true;
-      }
-
-      // TODO: implement check for the king may not be in check
-
-      // TODO: the square the king goes to and any intervening squares may not be under attack
-
-      return true;
-   }
-
-   function getCorrespondingCastle(moveLocation: Coordinate, board: Array<Array<(Piece | null)>>) : Piece | null {
-      if (moveLocation.equals(King.whiteCastleLeftMove)) {
-         return board[7][0];
-      } else if (moveLocation.equals(King.whiteCastleRightMove)) {
-         return board[7][7];
-      } else if (moveLocation.equals(King.blackCastleLeftMove)) {
-         return board[0][0];
-      } else if (moveLocation.equals(King.blackCastleRightMove)) {
-         return board[0][7];
-      }
-      return null
    }
 }
 
