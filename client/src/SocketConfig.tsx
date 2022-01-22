@@ -1,0 +1,1 @@
+export const REACT_APP_SOCKET_URL = 'http://localhost:3001';
