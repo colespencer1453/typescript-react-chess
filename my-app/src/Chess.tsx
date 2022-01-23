@@ -100,6 +100,7 @@ const Chess = (): JSX.Element => {
 
     function getLocationOfKingsPeremiter(locationOfCheckedKing: Coordinate) {
         let spacesToCheck = [];
+        
         spacesToCheck.push(new Coordinate((locationOfCheckedKing.x + 1), locationOfCheckedKing.y));
         spacesToCheck.push(new Coordinate((locationOfCheckedKing.x + 1), (locationOfCheckedKing.y - 1)));
         spacesToCheck.push(new Coordinate((locationOfCheckedKing.x + 1), (locationOfCheckedKing.y + 1)));
@@ -143,8 +144,6 @@ const Chess = (): JSX.Element => {
         setTeamInCheck('');
         setGameId(uuidv4());
     }
-
-    console.log(board);
 
     return (
         <>
