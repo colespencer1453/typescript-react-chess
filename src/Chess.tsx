@@ -5,7 +5,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend'
 import { Coordinate } from "./Pieces/Coordinate";
 import { Piece } from "./Pieces/Piece";
 import { initializeBoard } from '../src/Utilities/GameSetupUtilities'
-import { Pieces } from "./Enums/PieceEnum";
+import { Pieces } from "./Enums/Pieces";
 import { 
     getOppositeColor, 
     checkIfIsCheck, 
@@ -19,14 +19,15 @@ import { Button, Container, Typography, Grid } from "@mui/material";
 import ButtonAppBar from "./Views/ButtonAppBar";
 import { v4 as uuidv4 } from 'uuid';
 import { King } from './Pieces/King';
+import { Teams } from "./Enums/Teams";
 
 const Chess = (): JSX.Element => {
     const [board, setBoard] = useState(initializeBoard());
     const [isWhitesTurn, setIsWhitesTurn] = useState(true);
     const [isCheck, setIsCheck] = useState(false);
     const [isCheckMate, setIsCheckMate] = useState(false);
-    const [winningTeam, setWinningTeam] = useState('');
-    const [teamInCheck, setTeamInCheck] = useState('');
+    const [winningTeam, setWinningTeam] = useState(Teams.UNDEFINED);
+    const [teamInCheck, setTeamInCheck] = useState(Teams.UNDEFINED);
     const [gameId, setGameId] = useState(uuidv4());
 
     function handleIsValidMove(moveLocation: Coordinate, piece: Piece){
@@ -34,7 +35,7 @@ const Chess = (): JSX.Element => {
 
         const boardWithMoveExecuted = createCopyOfCurrentBoardAfterMove(moveLocation, piece, board);
         
-        if(checkIfIsCheck(piece.color, boardWithMoveExecuted)) return false;
+        if(checkIfIsCheck(piece.team, boardWithMoveExecuted)) return false;
 
         return true;
     }
@@ -51,13 +52,13 @@ const Chess = (): JSX.Element => {
         piece.setHasMoved(true);
         setIsWhitesTurn(prevState => !prevState);
 
-        if(checkIfIsCheck(getOppositeColor(piece.color), board)) {
-            if(checkIfIsCheckMate(getOppositeColor(piece.color))) {
+        if(checkIfIsCheck(getOppositeColor(piece.team), board)) {
+            if(checkIfIsCheckMate(getOppositeColor(piece.team))) {
                 setIsCheckMate(true);
-                setWinningTeam(piece.color);
+                setWinningTeam(piece.team);
             } 
 
-            setTeamInCheck(getOppositeColor(piece.color))
+            setTeamInCheck(getOppositeColor(piece.team))
             setIsCheck(true);
         } else {
             setIsCheck(false);
@@ -66,11 +67,11 @@ const Chess = (): JSX.Element => {
     }
 
     // TODO: Move these static functions not tied to the DOM to ValidationUtilities.tsx
-    function checkIfIsCheckMate(teamColorToCheck: string) : boolean {
-        const piecesOfAttackingTeam = getPiecesFromBoardByTeam(getOppositeColor(teamColorToCheck), board);
-        const piecesOfTeamInCheck = getPiecesFromBoardByTeam(teamColorToCheck, board);
+    function checkIfIsCheckMate(team: Teams) : boolean {
+        const piecesOfAttackingTeam = getPiecesFromBoardByTeam(getOppositeColor(team), board);
+        const piecesOfTeamInCheck = getPiecesFromBoardByTeam(team, board);
 
-        const checkedKing = getKingFromBoardByTeam(teamColorToCheck, board);
+        const checkedKing = getKingFromBoardByTeam(team, board);
         const locationOfCheckedKing = checkedKing?.currentLocation as Coordinate
 
         const attackers = piecesOfAttackingTeam.filter(piece => isValidMove(locationOfCheckedKing, piece as Piece, board));
@@ -113,8 +114,8 @@ const Chess = (): JSX.Element => {
         return spacesToCheck;
     }
 
-    function getKingFromBoardByTeam(teamColor: string, boardToCheck: Array<Array<(Piece | null)>>) {
-        return boardToCheck.flat().find(piece => piece?.color === teamColor && piece.pieceName === Pieces.KING);
+    function getKingFromBoardByTeam(team: Teams, boardToCheck: Array<Array<(Piece | null)>>) {
+        return boardToCheck.flat().find(piece => piece?.team === team && piece.pieceName === Pieces.KING);
     }
 
     function updatePieceLocation(moveLocation: Coordinate, piece: Piece) {
@@ -140,8 +141,8 @@ const Chess = (): JSX.Element => {
         setIsWhitesTurn(true);
         setIsCheck(false);
         setIsCheckMate(false);
-        setWinningTeam('');
-        setTeamInCheck('');
+        setWinningTeam(Teams.UNDEFINED);
+        setTeamInCheck(Teams.UNDEFINED);
         setGameId(uuidv4());
     }
 

@@ -1,30 +1,30 @@
 import { Coordinate } from "./Coordinate";
 import { Piece } from "./Piece";
-import  { ChessPawn } from '@emotion-icons/fa-solid'
-import { Pieces } from "../Enums/PieceEnum";
+import { ChessPawn } from '@emotion-icons/fa-solid'
+import { Pieces } from "../Enums/Pieces";
+import { Teams } from "../Enums/Teams";
+import { isDiagonalMove, isForwardsMove, moveIsInVeritcalRange, moveIsVerticallyForwards } from "../Utilities/ValidationUtilities";
 
 export class Pawn extends Piece{ 
-   constructor(startLocation: Coordinate, color: string) {
-      super(ChessPawn, startLocation, color, Pieces.PAWN);
+   constructor(startLocation: Coordinate, team: Teams) {
+      super(ChessPawn, startLocation, team, Pieces.PAWN);
    }
 
    isValidMove(moveLocation: Coordinate): boolean {
-      if(this.color === 'white'){
-         if(this.currentLocation.x === 6) {
-            return ((moveLocation.x - this.currentLocation.x >= -2 && moveLocation.x - this.currentLocation.x <=0) && (moveLocation.y === this.currentLocation.y)) ||
-            (((moveLocation.x - this.currentLocation.x === -1)) && (Math.abs(moveLocation.y - this.currentLocation.y) === 1));
-         }
+      return this.isOpeningMove(moveLocation) || this.isNormalNonOpeningMove(moveLocation) || this.isAttackMove(moveLocation);
+   }
 
-         return ((moveLocation.x - this.currentLocation.x === -1) && (moveLocation.y === this.currentLocation.y)) || 
-         (((moveLocation.x - this.currentLocation.x === -1)) && (Math.abs(moveLocation.y - this.currentLocation.y) === 1));
-      } else {
-         if(this.currentLocation.x === 1) {
-            return ((moveLocation.x - this.currentLocation.x <= 2 && moveLocation.x - this.currentLocation.x >=0 ) && (moveLocation.y === this.currentLocation.y)) || 
-            (((moveLocation.x - this.currentLocation.x === 1)) && (Math.abs(moveLocation.y - this.currentLocation.y) === 1));
-         }
+   isNormalNonOpeningMove(moveLocation: Coordinate): boolean {
+      return moveIsVerticallyForwards(moveLocation, this.currentLocation, this.team) && moveIsInVeritcalRange(moveLocation, this.currentLocation, 1, 2);
+   }
 
-         return ((moveLocation.x - this.currentLocation.x === 1) && (moveLocation.y === this.currentLocation.y)) || 
-         (((moveLocation.x - this.currentLocation.x === 1)) && (Math.abs(moveLocation.y - this.currentLocation.y) === 1));
-      }
+   isOpeningMove(moveLocation: Coordinate): boolean {
+      if (this.hasMoved) return false;
+      
+      return moveIsVerticallyForwards(moveLocation, this.currentLocation, this.team) && moveIsInVeritcalRange(moveLocation, this.currentLocation, 1, 3);
+   }
+
+   isAttackMove(moveLocation: Coordinate): boolean {
+      return isDiagonalMove(moveLocation, this.currentLocation) && isForwardsMove(moveLocation, this.currentLocation, this.team) && moveIsInVeritcalRange(moveLocation, this.currentLocation, 1, 2);
    }
 }

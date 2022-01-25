@@ -1,7 +1,8 @@
 import { Coordinate } from "./Coordinate";
 import { Piece } from "./Piece";
 import  { ChessKing } from '@emotion-icons/fa-solid'
-import { Pieces } from "../Enums/PieceEnum";
+import { Pieces } from "../Enums/Pieces";
+import { Teams } from "../Enums/Teams";
 
 export class King extends Piece{ 
 
@@ -12,8 +13,8 @@ export class King extends Piece{
    static possibleWhiteCastleMoves = [King.whiteCastleLeftMove, King.whiteCastleRightMove];
    static possibleBlackCastleMoves = [King.blackCastleLeftMove, King.blackCastleRightMove];
 
-   constructor(coordinate: Coordinate, color: string) {
-      super(ChessKing, coordinate, color, Pieces.KING);
+   constructor(coordinate: Coordinate, team: Teams) {
+      super(ChessKing, coordinate, team, Pieces.KING);
    }
    
    isValidMove( moveLocation: Coordinate): boolean {
@@ -27,12 +28,12 @@ export class King extends Piece{
    isCastlingMove(moveLocation: Coordinate): boolean {
       let whiteIsTryingToCastle = (
          this.hasMoved === false &&
-         this.color === 'white' && 
+         this.team === Teams.WHITE && 
          King.possibleWhiteCastleMoves.some(pos => pos.equals(moveLocation))
       )
       let blackIsTryingToCastle = (
          this.hasMoved === false &&
-         this.color === 'black' && 
+         this.team === Teams.BLACK && 
          King.possibleBlackCastleMoves.some(pos => pos.equals(moveLocation))
       )
       return whiteIsTryingToCastle || blackIsTryingToCastle;
