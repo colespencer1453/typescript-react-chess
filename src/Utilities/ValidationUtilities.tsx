@@ -1,8 +1,10 @@
-import { Pieces } from '../Enums/PieceEnum';
+import { Pieces } from '../Enums/Pieces';
 import { Coordinate } from '../Pieces/Coordinate'
 import { Piece } from '../Pieces/Piece';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, inRange } from 'lodash';
 import { King } from '../Pieces/King';
+import { absoluteValueDiff, diff } from './MathUtilities';
+import { Teams } from '../Enums/Teams';
 
 export const calculateSlope = (coordinate1: Coordinate, coordinate2: Coordinate): number => {
    const rise = coordinate2.y - coordinate1.y;
@@ -71,27 +73,27 @@ export const getSubsetOfPointsBetweenTwoPointsOnAVerticalLine = (coordinate1: Co
    return subset;
 }
 
-export function checkIfIsCheck(color: string, boardToCheck: Array<Array<(Piece | null)>>) {
-   const locationOfKing = getLocationOfKingByTeam(color, boardToCheck);
+export function checkIfIsCheck(team: Teams, boardToCheck: Array<Array<(Piece | null)>>) {
+   const locationOfKing = getLocationOfKingByTeam(team, boardToCheck);
 
-   return locationCanBeCaptured(color, boardToCheck, locationOfKing);
+   return locationCanBeCaptured(team, boardToCheck, locationOfKing);
 }
 
-export function getLocationOfKingByTeam(teamColor: string, boardToCheck: Array<Array<(Piece | null)>>) {
-   return boardToCheck.flat().find(piece => piece?.color === teamColor && piece.pieceName === Pieces.KING)?.currentLocation;
+export function getLocationOfKingByTeam(team: Teams, boardToCheck: Array<Array<(Piece | null)>>) {
+   return boardToCheck.flat().find(piece => piece?.team === team && piece.pieceName === Pieces.KING)?.currentLocation;
 }
 
-export function locationCanBeCaptured(color: string, boardToCheck: (Piece | null)[][], location: Coordinate | undefined) {
-   return getPiecesFromBoardByTeam(getOppositeColor(color), boardToCheck)
+export function locationCanBeCaptured(team: Teams, boardToCheck: (Piece | null)[][], location: Coordinate | undefined) {
+   return getPiecesFromBoardByTeam(getOppositeColor(team), boardToCheck)
        .some(piece => isValidMove(location as Coordinate, piece as Piece, boardToCheck));
 }
 
-export function getPiecesFromBoardByTeam(teamColor: string, boardToCheck: (Piece | null)[][]) {
-   return boardToCheck.flat().filter(piece => piece?.color === teamColor);
+export function getPiecesFromBoardByTeam(team: Teams, boardToCheck: (Piece | null)[][]) {
+   return boardToCheck.flat().filter(piece => piece?.team === team);
 }
 
-export function getOppositeColor(color: string): string {
-   return color === 'white' ? 'black' : 'white';
+export function getOppositeColor(team: Teams): Teams {
+   return team === Teams.WHITE ? Teams.BLACK : Teams.WHITE;
 }
 
 export function getCorrespondingRook(moveLocation: Coordinate, board: Array<Array<(Piece | null)>>) : Piece | null {
@@ -178,22 +180,22 @@ export function isValidMove(
          console.log(`rook: ${correspondingRook.currentLocation.x} ${correspondingRook.currentLocation.y}`)
       }
 
-      if (!correspondingRook || correspondingRook.pieceName !== Pieces.ROOK || correspondingRook.color !== piece.color || correspondingRook.hasMoved) {
+      if (!correspondingRook || correspondingRook.pieceName !== Pieces.ROOK || correspondingRook.team !== piece.team || correspondingRook.hasMoved) {
          return true;
       }
 
       // TODO: implement check for the king may not be in check
-      if (checkIfIsCheck(piece.color, board)) {
+      if (checkIfIsCheck(piece.team, board)) {
          return true;
       }
 
-      console.log(`check: ${piece.color}`)
+      console.log(`check: ${piece.team}`)
 
       // TODO: the square the king goes to and any intervening squares may not be under attack
       let moveDiff = moveLocation.y - piece.currentLocation.y;
       for (let i = 0; i < Math.abs(moveDiff); i += 1) {
          console.log(`underattack: ${moveLocation.y} to ${piece.currentLocation.y}`)
-         if (locationCanBeCaptured(piece.color, board, new Coordinate(piece.currentLocation.x, piece.currentLocation.y + (i * Math.sign(moveDiff))))){
+         if (locationCanBeCaptured(piece.team, board, new Coordinate(piece.currentLocation.x, piece.currentLocation.y + (i * Math.sign(moveDiff))))){
             return true;
          }
       }
@@ -212,4 +214,33 @@ export function createCopyOfCurrentBoardAfterMove(moveLocation: Coordinate, piec
    pieceCopy.setCurrentLocation(moveLocation);
 
    return boardCopy;
+}
+
+export const moveIsInVeritcalRange = (moveLocation: Coordinate, currentLocation: Coordinate, start: number, end: number) => {
+   return inRange(absoluteValueDiff(moveLocation.x,  currentLocation.x), start, end);
+}
+
+export const moveIsInHorizontalRange = (moveLocation: Coordinate, currentLocation: Coordinate) => {
+
+}
+
+export const moveIsVerticallyForwards = (moveLocation: Coordinate, currentLocation: Coordinate, team: Teams) => {
+   
+   return isVerticalMove(moveLocation, currentLocation) && isForwardsMove(moveLocation, currentLocation, team);
+}
+
+export const isVerticalMove = (moveLocation: Coordinate, currentLocation: Coordinate) => {
+   return moveLocation.y === currentLocation.y && moveLocation.x !== currentLocation.x;
+}
+
+export const isHorizontalMove = (moveLocation: Coordinate, currentLocation: Coordinate) => {
+   return moveLocation.x === currentLocation.x && moveLocation.y !== currentLocation.y;
+}
+
+export const isForwardsMove = (moveLocation: Coordinate, currentLocation: Coordinate, team: Teams) => {
+   return team === Teams.BLACK ? diff(moveLocation.x, currentLocation.x) > 0 : diff(moveLocation.x, currentLocation.x) < 0;
+}
+
+export const isDiagonalMove = (moveLocation: Coordinate, currentLocation: Coordinate) => {
+   return calculateAbsoluteSlope(moveLocation, currentLocation) === 1;
 }

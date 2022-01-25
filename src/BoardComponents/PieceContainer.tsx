@@ -1,4 +1,5 @@
 import { useDrag } from 'react-dnd'
+import { Teams } from '../Enums/Teams';
 import { Piece } from "../Pieces/Piece";
 
 interface PieceContainerProps {
@@ -10,7 +11,7 @@ const PieceContainer = ({ piece, isWhitesTurn} : PieceContainerProps) => {
    const [{ isDragging, canDrag}, drag] = useDrag(() => ({
       type: 'piece',
       item: piece,
-      canDrag: () => (isWhitesTurn && piece?.color === 'white') || (!isWhitesTurn && piece?.color === 'black'),
+      canDrag: () => (isWhitesTurn && piece?.team === Teams.WHITE) || (!isWhitesTurn && piece?.team === Teams.BLACK),
       collect: (monitor) => ({
         isDragging: !!monitor.isDragging(),
         canDrag: !!monitor.canDrag(),
@@ -35,7 +36,7 @@ const PieceContainer = ({ piece, isWhitesTurn} : PieceContainerProps) => {
          ref={drag}
          style={style}
       >
-         {piece ? <Icon size={48} style={{color:piece.color === 'white' ? "#efdfbb" : piece.color}}/> : <></>}
+         {piece ? <Icon size={48} style={{color:piece.team === Teams.WHITE ? "#efdfbb" : 'black'}}/> : <></>}
       </div>
    );
 }

@@ -2,12 +2,13 @@ import { Coordinate } from "./Coordinate";
 import { Piece } from "./Piece";
 import  { ChessQueen } from '@emotion-icons/fa-solid'
 import { calculateAbsoluteSlope } from "../Utilities/ValidationUtilities";
-import { Pieces } from "../Enums/PieceEnum";
+import { Pieces } from "../Enums/Pieces";
+import { Teams } from "../Enums/Teams";
 
 
 export class Queen extends Piece { 
-   constructor(coordinate: Coordinate, color: string) {
-      super(ChessQueen, coordinate, color, Pieces.QUEEN);
+   constructor(coordinate: Coordinate, team: Teams) {
+      super(ChessQueen, coordinate, team, Pieces.QUEEN);
    }
    
    isValidMove(moveLocation: Coordinate): boolean {
